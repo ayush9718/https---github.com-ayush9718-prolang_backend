@@ -5,8 +5,7 @@ exports.connect = ()=>{
 mongoose.connect(process.env.MONGO_URL,)
 .then(()=>console.log("db connection succesfull"))
 .catch((err)=>{
-    console.log("db connection error");
-    console.error(err);
-    process.exit();
+    console.log("db connection error occur");
+    console.error(err); 
 })
-}
+} 
