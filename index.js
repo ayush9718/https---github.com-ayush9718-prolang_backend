@@ -2,12 +2,17 @@ const express = require("express");
 const app = express();
 const dbconnect  = require("./config/dbconnection");
 const rooms = require("./routes/rooms");
-
 require("dotenv").config();
+
+// middleware
 app.use(express.json());
-const cors = require("cors");
-app.use(cors());
+app.use(fileUpload({
+    useTempFiles: true,        
+    tempFileDir: '/tmp/',
+}));
+
 app.use("/prolang/",rooms);
+
 
 dbconnect.connect();
 

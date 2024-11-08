@@ -1,26 +1,35 @@
 const User = require("../model/user");
+const Status = requiere("../model/status");
 
 exports.getRandRoom= async(req,res)=>{
     try{
-        
-        const randroom= await User.aggregate([
-            { $match: { status: "waiting" } },      
+
+        const {email}= req.user;
+        const userDetail= await User.findOne({email:email});
+        const randroom= await Status.aggregate([
+            { $match: { status: "waiting", language:userDetail.language }},      
             { $sample: { size: 1 } }             
           ]);
 
-          if (randroom.length > 0) {
+          if (randroom.length >0) {
+
             const rID = randroom[0]._id; 
-            const updatedRoom = await User.findByIdAndUpdate(
+            const updatedRoom = await Status.findByIdAndUpdate(
                 rID,
-                { status: "learning" 
+                { status: "learning" ,
+                    email_getter:email,
                 },{new:true});
             res.status(200).json({
+                success:true,
                 updatedRoom,
+                message:"getting random room successfull",
             })
+
           }
           else{
             res.status(400).json({
-                room:{_id:"-1"},
+                success:false,
+                randroom:{},
                 message:"dont have any waiting room right now"
             });}
     }
@@ -29,19 +38,27 @@ exports.getRandRoom= async(req,res)=>{
         console.error(err);
     }
 }
+
 exports.createRoom = async (req,res)=>{
     try{
-       
-        const room = await User.create({
+        const {email} = req.user;
+        const userDetail = await User.findOne({email:email})
+        const room = await Status.create({
             status:"waiting",
+            email_creator: email,
+            language:userDetail.language,
         });
+
         if(!room){
             res.status(404).json({
-                message:"room not created",
+                success:false,
                 room,
+                message:"room not created",
             });
         }
+
         res.status(200).json({
+            success:true,
             room,
             message:"room is created"
          });
